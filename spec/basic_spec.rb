@@ -37,4 +37,18 @@ describe SinatraClone, 'basic functionality' do
     end, '/foo').body.should include('"PATH_INFO"=>"/foo"') 
   end
 
+  it 'should be able to add helper methods' do
+    RackBox.request(SinatraClone.app do
+      helpers do
+        def a_helper str
+          "string passed to helper: #{ str }"
+        end
+      end
+
+      get '/' do
+        a_helper("foo")
+      end
+    end, '/').body.should == "string passed to helper: foo" 
+  end
+
 end

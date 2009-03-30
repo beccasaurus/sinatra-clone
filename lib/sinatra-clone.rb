@@ -27,6 +27,17 @@ class SinatraClone
 end
 
 class SinatraClone #:nodoc:
+
+  # instance methods in here are available globally 
+  # to an application, eg:
+  #
+  #   get '/' ...
+  #
+  #   helpers do ...
+  #
+  # for the methods that are available within the 
+  # route blocks (eg. #get) see Responder
+  #
   class Application
 
     attr_accessor :routes
@@ -38,6 +49,10 @@ class SinatraClone #:nodoc:
 
     def get path, &block
       routes[:get][path] = block
+    end
+
+    def helpers &block
+      Responder.class_eval &block
     end
 
     def call env
@@ -60,7 +75,7 @@ class SinatraClone #:nodoc:
     # this is basically the scope in which blocks (eg. get('/'){...}) get evaluated
     class Responder
       attr_reader :request, :response
-      
+
       def initialize env
         @request  = Rack::Request.new env
         @response = Rack::Response.new

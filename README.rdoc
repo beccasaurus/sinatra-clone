@@ -1,0 +1,10 @@
+= Sinatra Clone
+
+SinatraClone doesn't exist to fight Sinatra to the death.
+
+SinatraClone doesn't even exist to necessarily be good code!
+
+SinatraClone exists as a project I am screencasting the making of 
+to teach people howto code with Ruby and Rack to create a web framework.
+
+Screencasts can be found at http://remi.org/2009/00/00/sinatra-clone

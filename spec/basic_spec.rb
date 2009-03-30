@@ -29,4 +29,12 @@ describe SinatraClone, 'basic functionality' do
     RackBox.request(app, '/').body.should == "hello from *another* app!"
   end
 
+  it 'should have access to a request object' do
+    RackBox.request(SinatraClone.app do
+      get '/foo' do
+        request.env.inspect
+      end
+    end, '/foo').body.should include('"PATH_INFO"=>"/foo"') 
+  end
+
 end

@@ -43,7 +43,9 @@ class SinatraClone #:nodoc:
     def call env
       match = routes[ env['REQUEST_METHOD'].downcase.to_sym ][ env['PATH_INFO'] ]
       if match
-        [ 200, {}, self.instance_eval(&match) ]
+        responder = Responder.new env
+        body = responder.instance_eval &match
+        responder.finish(body)
       else
         [ 200, {}, "Route not found!  All Routes: #{ routes.inspect }" ]
       end
@@ -54,5 +56,21 @@ class SinatraClone #:nodoc:
     def set_defaults
       @routes ||= { :get => {} }
     end
+
+    # this is basically the scope in which blocks (eg. get('/'){...}) get evaluated
+    class Responder
+      attr_reader :request, :response
+      
+      def initialize env
+        @request  = Rack::Request.new env
+        @response = Rack::Response.new
+      end
+
+      def finish body
+        response.write body
+        response.finish
+      end
+    end
+
   end
 end

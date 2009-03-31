@@ -51,6 +51,18 @@ class SinatraClone #:nodoc:
       routes[:get][path] = block
     end
 
+    def post path, &block
+      routes[:post][path] = block
+    end
+    
+    def put path, &block
+      routes[:put][path] = block
+    end
+    
+    def delete path, &block
+      routes[:delete][path] = block
+    end
+
     def helpers &block
       Responder.class_eval &block
     end
@@ -69,7 +81,7 @@ class SinatraClone #:nodoc:
     private
 
     def set_defaults
-      @routes ||= { :get => {} }
+      @routes ||= { :get => {}, :post => {}, :put => {}, :delete => {} }
     end
 
     # this is basically the scope in which blocks (eg. get('/'){...}) get evaluated

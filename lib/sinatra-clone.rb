@@ -115,7 +115,7 @@ class SinatraClone #:nodoc:
           body = responder.instance_eval &match
           responder.finish(body)
         else
-          [ 200, {}, "Route not found!  All Routes: #{ routes.inspect }" ]
+          [ 404, {}, "Route not found!  All Routes: #{ routes.inspect }" ]
         end
       }
 

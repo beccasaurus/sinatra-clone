@@ -48,20 +48,34 @@ class SinatraClone #:nodoc:
       instance_eval &block  
     end
 
+    def add_route http_method, matcher, block
+      if matcher.is_a? String
+        named_captures = matcher.scan(/:(\w+)/)
+        unless named_captures.empty?
+          matcher = Regexp.new(matcher.gsub(/:(\w+)/, '(\w+)')) # replace :x with (\w+)
+          # add a named_captures method to the Regexp object with the names of the captures
+          eval "def matcher.named_captures
+            #{ named_captures.map {|arr| arr.first }.inspect }
+          end"
+        end
+      end
+      routes[http_method][matcher] = block
+    end
+
     def get path, &block
-      routes[:get][path] = block
+      add_route :get, path, block
     end
 
     def post path, &block
-      routes[:post][path] = block
+      add_route :post, path, block
     end
     
     def put path, &block
-      routes[:put][path] = block
+      add_route :put, path, block
     end
     
     def delete path, &block
-      routes[:delete][path] = block
+      add_route :delete, path, block
     end
 
     def helpers &block
@@ -86,6 +100,11 @@ class SinatraClone #:nodoc:
           match_data = matcher.match(path)
           if match_data
             params['captures'] = match_data[1..1_000_000]
+            if matcher.respond_to? :named_captures
+              matcher.named_captures.each_with_index do |key, index|
+                params[key] = match_data[index + 1]
+              end
+            end
             match = block
           end
         end

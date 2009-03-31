@@ -12,7 +12,6 @@ describe SinatraClone::Application, 'routing' do
   end
 
   it 'should be able to create routes with #params, eg. /foo/:id' do
-    pending
     app do
       get '/dogs/:id' do
         "dog ID is #{ params['id'] }"

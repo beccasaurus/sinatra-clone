@@ -11,8 +11,13 @@ module SinatraCloneSpecHelpers
     @app = SinatraClone.app &block
   end
 
-  def request path, options = {}
-    RackBox.request @app, path, options
+  def request *args
+    options = args.pop if args.last.is_a? Hash
+    app     = args.shift if args.first.respond_to? :call
+    path    = args.shift
+    app     ||= @app
+    options ||= {}
+    RackBox.request app, path, options
   end
 end
 

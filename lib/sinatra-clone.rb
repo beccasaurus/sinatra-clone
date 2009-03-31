@@ -40,7 +40,7 @@ class SinatraClone #:nodoc:
   #
   class Application
 
-    attr_accessor :routes
+    attr_reader :routes, :responder_class
 
     def initialize &block
       set_defaults
@@ -64,13 +64,13 @@ class SinatraClone #:nodoc:
     end
 
     def helpers &block
-      Responder.class_eval &block
+      responder_class.class_eval &block
     end
 
     def call env
       match = routes[ env['REQUEST_METHOD'].downcase.to_sym ][ env['PATH_INFO'] ]
       if match
-        responder = Responder.new env
+        responder = responder_class.new env
         body = responder.instance_eval &match
         responder.finish(body)
       else
@@ -82,9 +82,13 @@ class SinatraClone #:nodoc:
 
     def set_defaults
       @routes ||= { :get => {}, :post => {}, :put => {}, :delete => {} }
+      @responder_class ||= Responder.dup
     end
 
-    # this is basically the scope in which blocks (eg. get('/'){...}) get evaluated
+    # This is basically the scope in which blocks (eg. get('/'){...}) get evaluated
+    #
+    # it should be specific to a given Application
+    #
     class Responder
       attr_reader :request, :response
 

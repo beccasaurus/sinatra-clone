@@ -26,7 +26,27 @@ describe SinatraClone::Application, 'helper methods' do
     request('/').body.should == "string passed to helper: foo" 
   end
 
-  it 'applications should have their own unique helper methods'
+  it 'applications should have their own unique helper methods' do
+    app1 = app do
+      get('/'){ nonexistant_method }
+    end
+
+    lambda { request(app1, '/') }.should raise_error(NameError, /method `nonexistant_method'/)
+
+    app2 = app do
+      helpers do
+        def nonexistant_method
+        end
+      end
+      get('/'){ nonexistant_method }
+    end
+
+    # should STILL raise error
+    lambda { request(app1, '/') }.should raise_error(NameError, /method `nonexistant_method'/)
+
+    # meanwhile, app2 should NOT raise an error
+    lambda { request(app2, '/') }.should_not raise_error
+  end
 
   it 'should be able to access #response object' do
     app do

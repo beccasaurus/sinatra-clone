@@ -76,6 +76,10 @@ class SinatraClone #:nodoc:
     class Responder
       attr_reader :request, :response
 
+      def params
+        request.params
+      end
+
       def initialize env
         @request  = Rack::Request.new env
         @response = Rack::Response.new

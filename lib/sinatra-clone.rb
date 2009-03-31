@@ -75,9 +75,24 @@ class SinatraClone #:nodoc:
     def call env
       # wrap up this application's logic in a mini rack app
       rack_app = lambda { |env|
-        match = routes[ env['REQUEST_METHOD'].downcase.to_sym ][ env['PATH_INFO'] ]
+        http_method = env['REQUEST_METHOD'].downcase.to_sym
+        path        = env['PATH_INFO']
+
+        params      = { }
+        match       = nil
+
+        matchers = routes[http_method]
+        matchers.each do |matcher, block|
+          match_data = matcher.match(path)
+          if match_data
+            params['captures'] = match_data[1..1_000_000]
+            match = block
+          end
+        end
+        
         if match
           responder = responder_class.new env
+          responder.params.merge! params
           body = responder.instance_eval &match
           responder.finish(body)
         else

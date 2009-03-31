@@ -11,7 +11,25 @@ describe SinatraClone::Application, 'routing' do
     request('/foo').body.should include('Route not found')
   end
 
-  it 'should be able to create routes with #params, eg. /foo/:id'
-  it 'should be able to craete routes from regular expressions'
+  it 'should be able to create routes with #params, eg. /foo/:id' do
+    pending
+    app do
+      get '/dogs/:id' do
+        "dog ID is #{ params['id'] }"
+      end
+    end
+
+    request('/dogs/5').body.should == "dog ID is 5"
+  end
+
+  it 'should be able to create routes from regular expressions (params[:captures])' do
+    app do
+      get /^\/dogs\/(\w+)$/ do
+        "dog ID is #{ params['captures'].first }"
+      end
+    end
+
+    request('/dogs/5').body.should == "dog ID is 5"
+  end
 
 end

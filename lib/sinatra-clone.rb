@@ -83,7 +83,7 @@ class SinatraClone #:nodoc:
     end
 
     def use middlware
-      middlewares << middlware
+      middlewares.unshift middlware
     end
 
     def call env

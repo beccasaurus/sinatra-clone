@@ -40,7 +40,8 @@ class SinatraClone #:nodoc:
   #
   class Application
 
-    attr_reader :routes, :responder_class
+    # most or all of these should probably be private
+    attr_reader :routes, :responder_class, :middlewares
 
     def initialize &block
       set_defaults
@@ -67,22 +68,38 @@ class SinatraClone #:nodoc:
       responder_class.class_eval &block
     end
 
+    def use middlware
+      middlewares << middlware
+    end
+
     def call env
-      match = routes[ env['REQUEST_METHOD'].downcase.to_sym ][ env['PATH_INFO'] ]
-      if match
-        responder = responder_class.new env
-        body = responder.instance_eval &match
-        responder.finish(body)
-      else
-        [ 200, {}, "Route not found!  All Routes: #{ routes.inspect }" ]
+      # wrap up this application's logic in a mini rack app
+      rack_app = lambda { |env|
+        match = routes[ env['REQUEST_METHOD'].downcase.to_sym ][ env['PATH_INFO'] ]
+        if match
+          responder = responder_class.new env
+          body = responder.instance_eval &match
+          responder.finish(body)
+        else
+          [ 200, {}, "Route not found!  All Routes: #{ routes.inspect }" ]
+        end
+      }
+
+      # setup middlewares
+      middlewares.each do |middleware|
+        rack_app = middleware.new rack_app
       end
+
+      # call middlewares (with this app's logic being the most inner app)
+      rack_app.call env
     end
 
     private
 
     def set_defaults
-      @routes ||= { :get => {}, :post => {}, :put => {}, :delete => {} }
+      @routes          ||= { :get => {}, :post => {}, :put => {}, :delete => {} }
       @responder_class ||= Responder.dup
+      @middlewares     ||= []
     end
 
     # This is basically the scope in which blocks (eg. get('/'){...}) get evaluated

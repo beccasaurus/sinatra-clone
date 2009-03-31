@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe SinatraClone::Application, 'helper methods' do
 
-  it 'should have access to a request object' do
+  it 'should have access to a #request object' do
     app do
       get('/foo'){ request.env.inspect }
     end
@@ -46,6 +46,27 @@ describe SinatraClone::Application, 'helper methods' do
 
     request('/', :method => :get, :params => { :chunky => 'bacon' }).body.
       should include('"chunky"=>"bacon"')
+  end
+
+  it 'should be able to easily #redirect' do
+    app {
+      get('/'){ redirect '/login' }
+    }
+
+    request('/').status.should == 302
+    request('/').headers['Location'].should == '/login'
+  end
+
+  it 'should be able to easily set #status code of response' do
+    app {
+      get '/' do
+        status 404
+        "Not Found!"
+      end
+    }
+
+    request('/').body.should == 'Not Found!'
+    request('/').status.should == 404
   end
 
 end

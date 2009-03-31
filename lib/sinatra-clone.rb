@@ -92,6 +92,15 @@ class SinatraClone #:nodoc:
         request.params
       end
 
+      def redirect path
+        response['Location'] = path
+        response.status = 302
+      end
+
+      def status code
+        response.status = code
+      end
+
       def initialize env
         @request  = Rack::Request.new env
         @response = Rack::Response.new
